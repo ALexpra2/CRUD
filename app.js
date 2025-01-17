@@ -16,16 +16,20 @@ let usuarios = [
 
 app.get('/', (req, res) => {
   //Con el map recorroa cada una de las partes del array, genero el li y join para separarlo sin coma.
-  //Form para generar el input y agregarlo al post /usuarios
   //<a href="/usuarios">usuarios json</a> link al json generado en /usuarios
   res.send(`
   <h1>Lista de Usuarios</h1>
-  <ul>  
+  <ul>
   ${usuarios
     .map((usuario) => `<li>ID: ${usuario.id}, Nombre: ${usuario.nombre}, Edad: ${usuario.edad}, Nombre: ${usuario.lugarProcedencia} </li>`)
     .join('')}
-  </ul>
-  <form action="/usuarios" method="post">
+    </ul>
+    `);  
+  });
+
+  // todo esto se haría si no utilizara postman para introducir datos simulando el front pero ahora introduzco datos para (post delete put etc) desde postman
+
+  /*<form action="/usuarios" method="post">
   <label for="nombre">Nombre</label>
   <input type="text" id="nombre" name="nombre" required>
   <label for="edad">Edad</label>
@@ -35,8 +39,8 @@ app.get('/', (req, res) => {
   <button type="submit">Agregar usuario</button>
   </form>
   <a href="/usuarios">usuarios json</a>
-  `);
-});
+  `); 
+}); */
 
 //creo el json en usuarios del array usuarios + los campos introducidos
 app.get('/usuarios', (req, res) => {
@@ -65,6 +69,26 @@ app.get('/usuarios/:nombre', (req, res) => {
     }
     res.json(usuario);
 });
+
+//Actualizar un usuario por nombre
+app.put('/usuarios/:nombre', (req, res) => {
+  const index = usuarios.findIndex(usuario => usuario.nombre.toLowerCase() === req.params.nombre.toLowerCase());   //Find index devuelve el index si existe o -1 si no existe por eso valido -1 en el if
+  if (index !== -1) {    
+    usuarios[index] = { ...usuarios[index], ...req.body };                                                         //me traigo el usuario[index] y le cambio los datos requeridos en req.body
+    res.json(usuarios);
+  }
+    res.status(404).json({ mensaje: 'Usuario no encontrado' });
+  });
+
+
+ //Eliminar un usuario                    
+app.delete('/usuarios/:nombre', (req, res) => {                                                                     //elimina el usuario pasado como :nombre
+  usuarios = usuarios.filter(usuario => usuario.nombre.toLowerCase() !== req.params.nombre.toLowerCase());          //devuelvo a la lista usuarios todos menos el que voy a eliminar
+    res.json({ 
+      mensaje: 'Usuario eliminado correctamente',
+      usuarios: usuarios
+     }); 
+});  
 
 app.listen(3000, () => {
   console.log('Express esta escuchando en el puerto http://localhost:3000');
